@@ -1,0 +1,61 @@
+#!/usr/bin/perl -w
+
+use File::Basename;
+
+binmode STDOUT, ':utf8';
+
+my %vulgar = (
+  0 => ' ',
+  0.25 => "\x{00bc}",
+  0.5 => "\x{00bd}",
+  0.75 => "\x{00be}",
+);
+
+my $oz = 28.35;
+
+sub show($$$) {
+  my($lb, $oz, $frac) = @_;
+
+  if ($lb == 0) {
+    if ($oz == 0) {
+      printf "%2s %2s%s\n", '', '', $frac;
+    } else {
+      printf "%2s %2s%s\n", '', $oz, $frac;
+    }
+  } else {
+    printf "%2d-%2d%s\n", $lb, $oz, $frac;
+  }
+}
+
+sub main() {
+
+  for (@ARGV) {
+    printf "%5d ", $_;
+
+    my $gram = $_;
+
+    if ((basename $0) eq 'oz') {
+      $gram *= $oz;
+    } elsif ((basename $0) eq 'lb') {
+      $gram *= $oz * 16;
+    }
+
+    if ($gram < $oz) {
+      my $x = (sprintf '%.f', ($gram / $oz * 4))/4;
+
+      if (exists $vulgar{$x}) {
+        show(0, 0, $vulgar{$x});
+        return;
+      }
+    }
+
+    my $totoz = (sprintf '%.f', ($gram / $oz * 2))/2;
+    my $lb = int($totoz/16);
+    my $wholeoz = int($totoz - 16*$lb);
+    my $fracoz = $totoz - 16*$lb - $wholeoz;
+
+    show($lb, $wholeoz, $vulgar{$fracoz});
+  }
+}
+
+main;
