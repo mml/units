@@ -31,9 +31,25 @@ our %fraction = (
   7 => ' 7/8',
 );
 
-if ($ARGV[0] =~ /\./) {
+sub inch($) {
   my $inch = shift;
   printf "%s\" = %.fmm\n", $inch, $inch*25.4;
+}
+
+# Three ways to specify inches.
+# decimal:              1.875	0.5	1.0
+# fraction:             15/8	1/2	1/1 (<-- a stretch)
+# mixed fraction:	1-7/8	0-1/2	1-
+if ($ARGV[0] =~ /\./) {
+  inch $ARGV[0];
+} elsif ($ARGV[0] =~ m{^(\d+)/(\d+)$}) {
+  inch $1 / $2;
+} elsif ($ARGV[0] =~ m{^(\d+)-(?:(\d+)/(\d+))?$}) {
+  if (defined $2) {
+    inch $1 + $2 / $3;
+  } else {
+    inch $1;
+  }
 } else {
   my $mm = shift;
   my $eighths = sprintf '%.f', $mm / 3.175;
